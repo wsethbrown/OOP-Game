@@ -64,7 +64,15 @@ class Game {
     * Checks if player has remaining lives and ends game if player is out
     */
     removeLife() {
-        
+        const scoreboard = document.querySelectorAll('#scoreboard ol li')
+        const keyboard = document.querySelectorAll('.key')
+        const hearts = scoreboard.img
+        const missed = 0
+
+        for (let i = 0; i < keyboard.length; i++) {
+            if ()
+        }
+
     }
 
     /**
@@ -72,8 +80,11 @@ class Game {
     * @param {boolean} gameWon - Whether or not the user won the game
     */
     gameOver(gameWon) {
+        console.log(gameWon)
         if (gameWon) {
             startDiv.innerHTML = '<h1>You have won!</h1>'
+        } else {
+            startDiv.innerHTML = '<h1>Sorry, you lost!</h1>'
         }
     }
 
