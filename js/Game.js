@@ -41,6 +41,7 @@ class Game {
         startDiv.style.display = 'none'
         this.activePhrase = this.getRandomPhrase()
         this.activePhrase.addPhraseToDisplay()
+        this.missed = 0
     }
 
     /**
@@ -49,12 +50,10 @@ class Game {
     won
     */
     checkForWin() {
-        let gameWon = 0
-        let remainingLetters = document.querySelectorAll('.hide')
-        if (gameWon === remainingLetters.length) {
-            return gameWon = true
+        if (document.querySelectorAll('.hide').length == 0) {
+            return true
         } else {
-            return gameWon = false
+            return false
         }
     }
 
@@ -64,13 +63,13 @@ class Game {
     * Checks if player has remaining lives and ends game if player is out
     */
     removeLife() {
-        const scoreboard = document.querySelectorAll('#scoreboard ol li')
-        const keyboard = document.querySelectorAll('.key')
-        const hearts = scoreboard.img
-        const missed = 0
-
-        for (let i = 0; i < keyboard.length; i++) {
-            if ()
+        const removeHeart = document.querySelectorAll('.tries img')[this.missed];
+        removeHeart.src = 'images/lostHeart.png'
+        if (this.missed < 5) {
+            this.missed ++
+        }
+        if (this.missed == 5) {
+            this.gameOver('loss')
         }
 
     }
@@ -80,19 +79,36 @@ class Game {
     * @param {boolean} gameWon - Whether or not the user won the game
     */
     gameOver(gameWon) {
-        console.log(gameWon)
-        if (gameWon) {
-            startDiv.innerHTML = '<h1>You have won!</h1>'
+        let overlay = document.getElementById('overlay')
+        overlay.style.display = 'flex';
+        if (outcome == 'win') {
+            document.querySelector('h1').textContent = `Congrats, you won!`
+            overlay.className = 'win'
         } else {
-            startDiv.innerHTML = '<h1>Sorry, you lost!</h1>'
+            document.querySelector('h1').textContent = `Sorry, game over!`
+            overlay.className = 'lose'
         }
+        document.querySelector('#phrase ul').innerHTML = ''
+        resetKeys(); 
+        const replaceHeart = document.querySelectorAll('.tries img')
+        replaceHeart.forEach(heart => heart.src = 'images/liveHeart.png') 
+        // game = undefined; 
     }
 
-    handleInteraction() {
-        checkLetter()
-        showMatchedLetter()
-        checkForWin()
-        removeLife()
-        gameOver()
+    handleInteraction(letter) {
+        let key = document.querySelector(`.key.${letter}`)
+        if (!key.disabled) {
+            key.disabled = true
+            if (this.activePhrase.checkLetter(letter)) {
+                key.classList.add('chosen')
+                this.activePhrase.showMatchedLetter(letter);
+                if (this.checkForWin()){
+                    this.gameOver('win')
+                }
+            } else {
+                key.classList.add('wrong')
+                this.removeLife()
+            }
+        }
     }
 }
