@@ -3,112 +3,116 @@
  * Game.js */
 
 class Game {
-    constructor() {
-        this.missed = 0,
-        this.phrases = this.createPhrases()
-        this.activePhrase = null
-    }
-
-    /**
-    * Creates phrases for use in game
-    * @return {array} An array of phrases that could be used in the game
-    */
-    createPhrases() {
-        let phraseArray = [
+	constructor() {
+		this.missed = 0;
+		this.phrases = [
             new Phrase ("Life is like a box of chocolates"),
-            new Phrase ("We're going to need a bigger boat"),
-            new Phrase ("No, I am your father"),
+            new Phrase ("Were going to need a bigger boat"),
+            new Phrase ("No I am your father"),
             new Phrase ("Say what again"),
-            new Phrase ("Fear is the mindkiller")
-        ]
-        return phraseArray
-    }
+            new Phrase ("Fear is the mind killer")
+		];
+		this.activePhrase = null;
+	}
 
-    /**
-    * Selects random phrase from phrases property
-    * @return {Object} Phrase object chosen to be used
-    */
-    getRandomPhrase() {
-        let randomPhrase = Math.floor(Math.random() * this.phrases.length -1) + 1
-        return this.phrases[randomPhrase]
-    }
+	//Start the game by selecting a random phrase from the list using getRandomPhrase
+  
+	startGame() {
+		const gameOverlay = document.getElementById('overlay');
+		gameOverlay.style.display = 'none';
+		this.activePhrase = this.getRandomPhrase();
+		this.activePhrase.addPhraseToDisplay();
+	}
 
-    /**
-    * Begins game by selecting a random phrase and displaying it to user
-    */
-    startGame() {
-        let startDiv = document.querySelector('#overlay')
-        startDiv.style.display = 'none'
-        this.activePhrase = this.getRandomPhrase()
-        this.activePhrase.addPhraseToDisplay()
-        this.missed = 0
-    }
+	//Choose a random phrase from the list
 
-    /**
-    * Checks for winning move
-    * @return {boolean} True if game has been won, false if game wasn't
-    won
-    */
-    checkForWin() {
-        if (document.querySelectorAll('.hide').length == 0) {
-            return true
-        } else {
-            return false
-        }
-    }
+	getRandomPhrase() {
+		const randomPhraseIndex = Math.floor(Math.random() * this.phrases.length);
+		return this.phrases[randomPhraseIndex];
+	}
 
-    /**
-    * Increases the value of the missed property
-    * Removes a life from the scoreboard
-    * Checks if player has remaining lives and ends game if player is out
-    */
-    removeLife() {
-        const removeHeart = document.querySelectorAll('.tries img')[this.missed];
-        removeHeart.src = 'images/lostHeart.png'
-        if (this.missed < 5) {
-            this.missed ++
-        }
-        if (this.missed == 5) {
-            this.gameOver('loss')
-        }
+	//Increment the missed variable, change the haeart icon, and check for a loss if this method is called
 
-    }
+	removeLife() {
+		this.missed += 1;
+		const scoreboard = document.querySelector('#scoreboard ol').children;
+		scoreboard[this.missed - 1].querySelector('img').src = 'images/lostHeart.png';
+		if (this.missed === 5) {
+			this.gameOver('lose');
+		}
+	}
 
-    /**
-    * Displays game over message
-    * @param {boolean} gameWon - Whether or not the user won the game
-    */
-    gameOver(gameWon) {
-        let overlay = document.getElementById('overlay')
-        overlay.style.display = 'flex';
-        if (outcome == 'win') {
-            document.querySelector('h1').textContent = `Congrats, you won!`
-            overlay.className = 'win'
-        } else {
-            document.querySelector('h1').textContent = `Sorry, game over!`
-            overlay.className = 'lose'
-        }
-        document.querySelector('#phrase ul').innerHTML = ''
-        resetKeys(); 
-        const replaceHeart = document.querySelectorAll('.tries img')
-        replaceHeart.forEach(heart => heart.src = 'images/liveHeart.png') 
-        // game = undefined; 
-    }
+	//Handle the proper response if a button is clicked that results in a correct or incorrect guess
+	
+	handleInteraction(button) {
+		const letter = button.textContent;
+		//const winner = this.checkForWin();
+		button.disabled = true;
+		if (this.activePhrase.checkLetter(letter)) {
+			button.classList.add('chosen'); //add class name
+			this.activePhrase.showMatchedLetter(letter);
+			const winner = this.checkForWin();
+			if (winner) {
+				this.gameOver('win');
+			}
+		} else {
+			button.classList.add('wrong'); // add class name
+			this.removeLife();
+		}
+	}
 
-    handleInteraction(letter) {
-        let key = document.querySelector(`.key.${letter}`)
-        if (!key.disabled) {
-            key.disabled = true
-            if (this.activePhrase.checkLetter(letter)) {
-                key.classList.add('chosen')
-                this.activePhrase.showMatchedLetter(letter);
-                if (this.checkForWin()){
-                    this.gameOver('win')
-                }
-            } else {
-                key.classList.add('wrong')
-                this.removeLife()
-            }
-        }
-    }
+	//method checks to see if all the letters in a phrase were guessed
+
+	checkForWin() {
+		const keyList = document.querySelector('#phrase ul').children;
+		let showCharacterCount = 0;
+		let spaceCharacterCount = 0;
+		for (let i = 0; i < keyList.length; i++) {
+			if (keyList[i].classList.contains('show')) {
+				showCharacterCount += 1;
+			} else if (keyList[i].classList.contains('space')) {
+				spaceCharacterCount += 1;
+			}
+		}
+		return (showCharacterCount + spaceCharacterCount) === keyList.length
+	}
+
+	//method to reset the game for another game
+
+	resetGame() {
+		const keyList = document.querySelector('#phrase ul');
+		const keys = document.getElementsByClassName('key');
+		const buttonReset = document.getElementById('btn__reset');
+		const scoreboard = document.querySelector('#scoreboard ol').children;
+	
+		keyList.innerHTML = '';
+		for (let i = 0; i < keys.length; i++) {
+			keys[i].className = 'key';
+			keys[i].disabled = false;
+		}
+		buttonReset.textContent = 'Play Again';
+		for (let i = 0; i < scoreboard.length; i++) {
+			scoreboard[i].querySelector('img').src = 'images/liveHeart.png';
+		}
+	}
+	
+	//method manages the display of you win/lose overlay
+
+	gameOver(gameStatus) {
+		const gameOverlay = document.getElementById('overlay');
+		const gameOverMessage = document.getElementById('game-over-message');
+		const overlay = document.getElementById('overlay');
+		const currentOverlayClass = overlay.className;
+		
+    document.removeEventListener('keyup', eventHandler);
+		gameOverlay.style.display = 'block';
+		
+    if (gameStatus == 'lose') {
+			gameOverMessage.textContent = 'Sorry, Game Over!';
+		} else if (gameStatus === 'win') {
+			gameOverMessage.textContent = 'Congrats! You Win!';
+		}
+		overlay.classList.replace(currentOverlayClass, gameStatus);
+		this.resetGame();
+	}
 }

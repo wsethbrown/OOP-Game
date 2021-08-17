@@ -1,50 +1,39 @@
-/* Treehouse FSJS Techdegree
- * Project 4 - OOP Game App
- * Phrase.js */
-
 class Phrase {
-    constructor(phrase) {
-        this.phrase = phrase.toLowerCase()
-    }
+	constructor(phrase) {
+		this.phrase = phrase.toLowerCase();
+	}
 
-    /**
-    * Display phrase on game board
-    */
-    addPhraseToDisplay() {
-        const splitPhrase = this.phrase.split('')
-        const phraseDiv = document.querySelector('#phrase ul')
+  //Display a random phrase from the array
+  
+	addPhraseToDisplay() {
+		const splitPhrase = this.phrase.split('');
+		const phraseContainer = document.getElementById('phrase');
+		splitPhrase.forEach(character => {
+			let spaceCharacter = '<li class="space"> </li>'
+			let letterCharacter = `<li class="hide letter ${character}">${character}</li>`
+			if (character === ' ') {
+				phraseContainer.querySelector('ul').insertAdjacentHTML('beforeend', spaceCharacter);
+			} else {
+				phraseContainer.querySelector('ul').insertAdjacentHTML('beforeend', letterCharacter);
+			}
+		})
+	}
+  
+    //Check the letter guessed against the splitPhrase characters
+  
+	checkLetter(guessedLetter) {
+		const splitPhrase = this.phrase.split('');
+		if (splitPhrase.includes(guessedLetter)) {
+			return true;
+		}
+	}
+    
+    //If the letter is included in splitPhrase, show it in the main game
 
-        splitPhrase.forEach(letter => {
-            const spaceChar = '<li class="space"> </li>'
-            const letterChar = `<li class="hide letter ${letter}">${letter}<li>`
-            
-            if (letter === ' ') {
-                phraseDiv.insertAdjacentHTML('beforeend', spaceChar)
-            } else {
-                phraseDiv.insertAdjacentHTML('beforeend', letterChar)
-            }
-        })
-    }
-
-    /**
-    * Checks if passed letter is in phrase
-    * @param (string) letter - Letter to check
-    */
-    checkLetter(letter) {
-        return this.phrase.includes(letter)
-    }
-
-    /**
-    * Displays passed letter on screen after a match is found
-    * @param (string) letter - Letter to display
-    */
-    showMatchedLetter(letter) {
-        const correctLetter = document.querySelectorAll('#phrase ul li')
-        for (let i = 0; i < correctLetter.length; i++) {
-            if (correctLetter[i] === letter) {
-                correctLetter.className('show')
-            }
-        }
-    }
- }
-
+	showMatchedLetter(matchedLetter) {
+		const letters = document.getElementsByClassName(matchedLetter);
+		for (let i = 0; i < letters.length; i++) {
+			letters[i].classList.replace('hide', 'show');
+		}
+	}
+}

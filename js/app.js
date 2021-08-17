@@ -1,35 +1,32 @@
-/* Treehouse FSJS Techdegree
- * Project 4 - OOP Game App
- * app.js */
+let game
 
-let keys = document.querySelectorAll('.key') 
+const startGameListener = document.getElementById('btn__reset');
+const keys = document.getElementsByClassName('key');
 
-// Reset key function - resets on-screen key button classes, removes chosen/wrong class names, adds letter, rests disabled to false 
-const resetKeys = () => {keys.forEach(key => { 
-    key.className = `key ${key.textContent}`
-    key.disabled = false
-})};
+//Handles if a player use the keyboard instead of mouse
 
-// Start button starts game - creates new game object & calls startGame()
-document.querySelector('#btn__reset').addEventListener('click', (e) => {
-    game = new Game()
-    game.startGame()
-});
+let eventHandler = function(e) {
+	let keyPress = e.key;
+	for (let i = 0; i < keys.length; i++) {
+		if (keys[i].innerHTML === keyPress) {
+			if (keys[i].disabled) {
+				continue
+			} else {
+				game.handleInteraction(keys[i]);
+			}
+		}
+	}
+}
 
-// Clicking on an on-screen key button calls handleInteraction(), passing in the letter
-qwerty.addEventListener('click', (e) => {
-    let letter = e.target.textContent
-    if (e.target.classList.contains('key')) {
-        game.handleInteraction(letter)
-    }
-});
+//Resets the game to the default state if the game is manually reset
 
-// Pressing physical keyboard letter key calls handleInteraction(), passing in the letter
-window.addEventListener("keydown", (e) => {
-    if (/^[a-z]$/i.test(e.key) && game) {
-        let letter = e.key
-        game.handleInteraction(letter)
-        // Cancel the default action to avoid it being handled twice
-        e.preventDefault();
-    }
-}, true)
+startGameListener.addEventListener('click', () => {
+  game = new Game();
+	game.startGame();
+	document.addEventListener('keyup', eventHandler);
+})
+for (let i = 0; i < keys.length; i++) {
+	keys[i].addEventListener('click', (e) => {
+		game.handleInteraction(e.target);
+	})
+}
